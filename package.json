@@ -15,7 +15,11 @@
     "test": "cd server && npm test && cd ../client && npm test",
     "test:auth": "node test-auth-flows.js",
     "test:interactive": "node interactive-test.js",
-    "test:commands": "cat test-commands.sh"
+    "test:commands": "cat test-commands.sh",
+    "deploy": "./deploy-cli.sh",
+    "deploy:quick": "./quick-deploy.sh",
+    "deploy:backend": "./deploy-commands.sh",
+    "deploy:setup": "npm install -g vercel @railway/cli"
   },
   "keywords": [
     "cycling",
