@@ -12,7 +12,10 @@
     "build": "npm run server:build && npm run client:build",
     "start": "cd server && npm start",
     "install:all": "npm install && cd server && npm install && cd ../client && npm install",
-    "test": "cd server && npm test && cd ../client && npm test"
+    "test": "cd server && npm test && cd ../client && npm test",
+    "test:auth": "node test-auth-flows.js",
+    "test:interactive": "node interactive-test.js",
+    "test:commands": "cat test-commands.sh"
   },
   "keywords": [
     "cycling",

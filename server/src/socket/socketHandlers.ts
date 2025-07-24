@@ -24,7 +24,7 @@ export const setupSocketIO = (io: Server) => {
         return next(new Error('Authentication error: User not found'));
       }
       
-      socket.userId = user._id.toString();
+      socket.userId = (user._id as any).toString();
       next();
     } catch (err) {
       next(new Error('Authentication error: Invalid token'));

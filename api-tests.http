@@ -1,0 +1,128 @@
+# CycleConnect API Tests
+# Use with REST Client extension in VS Code
+
+@baseUrl = http://localhost:5000
+@contentType = application/json
+
+### Health Check
+GET {{baseUrl}}/health
+
+### Register User - Alice
+POST {{baseUrl}}/api/auth/register
+Content-Type: {{contentType}}
+
+{
+  "email": "alice@test.com",
+  "password": "password123",
+  "profile": {
+    "firstName": "Alice",
+    "lastName": "Johnson",
+    "bio": "Love cycling in the mountains!"
+  },
+  "cycling": {
+    "experienceLevel": "intermediate",
+    "preferredDistance": 50,
+    "preferredTerrain": ["mountain", "road"]
+  },
+  "location": {
+    "type": "Point",
+    "coordinates": [-74.006, 40.7128]
+  }
+}
+
+### Register User - Bob
+POST {{baseUrl}}/api/auth/register
+Content-Type: {{contentType}}
+
+{
+  "email": "bob@test.com",
+  "password": "password456",
+  "profile": {
+    "firstName": "Bob",
+    "lastName": "Smith",
+    "bio": "Urban cycling enthusiast"
+  },
+  "cycling": {
+    "experienceLevel": "beginner",
+    "preferredDistance": 20,
+    "preferredTerrain": ["road", "city"]
+  },
+  "location": {
+    "type": "Point",
+    "coordinates": [-73.935242, 40.730610]
+  }
+}
+
+### Login - Alice
+POST {{baseUrl}}/api/auth/login
+Content-Type: {{contentType}}
+
+{
+  "email": "alice@test.com",
+  "password": "password123"
+}
+
+### Login - Bob
+POST {{baseUrl}}/api/auth/login
+Content-Type: {{contentType}}
+
+{
+  "email": "bob@test.com",
+  "password": "password456"
+}
+
+### Refresh Token
+# Replace YOUR_TOKEN with actual token from login response
+POST {{baseUrl}}/api/auth/refresh
+Content-Type: {{contentType}}
+
+{
+  "token": "YOUR_TOKEN"
+}
+
+### Get User Profile (Protected)
+# Replace YOUR_TOKEN with actual token from login response
+GET {{baseUrl}}/api/users/profile
+Authorization: Bearer YOUR_TOKEN
+
+### Get All Rides (Protected)
+# Replace YOUR_TOKEN with actual token from login response
+GET {{baseUrl}}/api/rides
+Authorization: Bearer YOUR_TOKEN
+
+### Logout
+POST {{baseUrl}}/api/auth/logout
+Content-Type: {{contentType}}
+
+### Test Invalid Email Registration
+POST {{baseUrl}}/api/auth/register
+Content-Type: {{contentType}}
+
+{
+  "email": "invalid-email",
+  "password": "password123",
+  "profile": {
+    "firstName": "Test",
+    "lastName": "User"
+  },
+  "location": {
+    "type": "Point",
+    "coordinates": [0, 0]
+  }
+}
+
+### Test Wrong Password Login
+POST {{baseUrl}}/api/auth/login
+Content-Type: {{contentType}}
+
+{
+  "email": "alice@test.com",
+  "password": "wrongpassword"
+}
+
+### Test Protected Endpoint Without Token
+GET {{baseUrl}}/api/users/profile
+
+### Test Protected Endpoint With Invalid Token
+GET {{baseUrl}}/api/users/profile
+Authorization: Bearer invalid-token
