@@ -57,12 +57,12 @@ if ! railway status &> /dev/null; then
 fi
 
 # Set environment variables
-railway variables set NODE_ENV=production
-railway variables set PORT=5000
-railway variables set MONGODB_URI="$MONGODB_URI"
-railway variables set JWT_SECRET="$JWT_SECRET"
-railway variables set JWT_REFRESH_SECRET="$JWT_REFRESH_SECRET"
-railway variables set CLIENT_URL="https://temp-url.vercel.app"
+railway variables --set "NODE_ENV=production"
+railway variables --set "PORT=5000"
+railway variables --set "MONGODB_URI=$MONGODB_URI"
+railway variables --set "JWT_SECRET=$JWT_SECRET"
+railway variables --set "JWT_REFRESH_SECRET=$JWT_REFRESH_SECRET"
+railway variables --set "CLIENT_URL=https://temp-url.vercel.app"
 
 # Deploy backend
 railway up --detach
@@ -108,7 +108,7 @@ echo ""
 
 # Update backend CORS
 echo "🔄 Updating backend CORS..."
-railway variables set CLIENT_URL="$VERCEL_URL"
+railway variables --set "CLIENT_URL=$VERCEL_URL"
 railway up --detach
 
 echo ""

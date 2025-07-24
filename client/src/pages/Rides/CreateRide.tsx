@@ -33,8 +33,8 @@ import { useNavigate } from 'react-router-dom';
 interface RideFormData {
   title: string;
   description: string;
-  rideType: string;
-  difficulty: string;
+  rideType: 'road' | 'mountain' | 'gravel' | 'commute' | 'leisure' | '';
+  difficulty: 'beginner' | 'intermediate' | 'advanced' | 'expert' | '';
   route: {
     startPoint: {
       coordinates: [number, number];
@@ -58,7 +58,20 @@ interface RideFormData {
     requireApproval: boolean;
     allowWaitlist: boolean;
   };
+  requirements: {
+    minExperience: string;
+    ageRestriction: string;
+    equipment: string[];
+  };
   tags: string[];
+  // Compatibility aliases for the form
+  startDateTime?: Date | null;
+  startLocation?: { address: string; coordinates: [number, number] };
+  endLocation?: { address: string; coordinates: [number, number] };
+  maxParticipants?: number;
+  estimatedDuration?: number;
+  estimatedDistance?: number;
+  isPrivate?: boolean;
 }
 
 interface FormErrors {
@@ -108,7 +121,20 @@ const CreateRide: React.FC = () => {
       requireApproval: false,
       allowWaitlist: true
     },
-    tags: []
+    requirements: {
+      minExperience: '',
+      ageRestriction: '',
+      equipment: []
+    },
+    tags: [],
+    // Compatibility aliases for the form
+    startDateTime: null,
+    startLocation: { address: '', coordinates: [0, 0] },
+    endLocation: { address: '', coordinates: [0, 0] },
+    maxParticipants: 8,
+    estimatedDuration: 120,
+    estimatedDistance: 25,
+    isPrivate: false
   });
 
   const [formErrors, setFormErrors] = useState<FormErrors>({});
@@ -217,8 +243,8 @@ const CreateRide: React.FC = () => {
     }
 
     if (step === 1) {
-      if (!formData.startLocation.address.trim()) errors.startLocation = 'Start location is required';
-      if (!formData.endLocation.address.trim()) errors.endLocation = 'End location is required';
+      if (!formData.startLocation?.address.trim()) errors.startLocation = 'Start location is required';
+      if (!formData.endLocation?.address.trim()) errors.endLocation = 'End location is required';
     }
 
     setFormErrors(errors);
@@ -360,7 +386,7 @@ const CreateRide: React.FC = () => {
               <TextField
                 fullWidth
                 label="Start Location"
-                value={formData.startLocation.address}
+                value={formData.startLocation?.address || ''}
                 onChange={(e) => handleLocationChange('startLocation', e.target.value)}
                 error={!!formErrors.startLocation}
                 helperText={formErrors.startLocation || 'Enter the meeting point address'}
@@ -375,7 +401,7 @@ const CreateRide: React.FC = () => {
               <TextField
                 fullWidth
                 label="End Location (Optional)"
-                value={formData.endLocation.address}
+                value={formData.endLocation?.address || ''}
                 onChange={(e) => handleLocationChange('endLocation', e.target.value)}
                 error={!!formErrors.endLocation}
                 helperText={formErrors.endLocation || 'Leave empty for loop rides'}

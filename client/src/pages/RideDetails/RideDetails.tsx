@@ -326,7 +326,7 @@ const RideDetails: React.FC = () => {
             </Card>
 
             {/* Chat Component */}
-            <RideChat rideId={ride._id} isParticipant={isParticipant || isOrganizer} />
+            <RideChat rideId={ride._id} isParticipant={Boolean(isParticipant || isOrganizer)} />
           </Box>
         </Grid>
       </Grid>
