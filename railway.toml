@@ -1,0 +1,15 @@
+nixpacks.toml
+# Railway configuration for CycleConnect backend
+
+[build]
+  # Use Node.js 18
+  nixpkgs = ["nodejs_18", "npm-9_x"]
+
+[start]
+  # Change to server directory and start the production server
+  cmd = "cd server && npm install && npm run build && npm start"
+
+[variables]
+  # Set Node environment
+  NODE_ENV = "production"
+  PORT = "5000"
