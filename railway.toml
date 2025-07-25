@@ -1,4 +1,3 @@
-nixpacks.toml
 # Railway configuration for CycleConnect backend
 
 [build]
