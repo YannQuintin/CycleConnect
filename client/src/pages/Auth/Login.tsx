@@ -14,7 +14,7 @@ import {
   Checkbox
 } from '@mui/material';
 import { DirectionsBike as BikeIcon, Google as GoogleIcon } from '@mui/icons-material';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 
 interface LoginFormData {
@@ -30,7 +30,11 @@ interface FormErrors {
 
 const Login: React.FC = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { login, isLoading, error } = useAuth();
+  
+  // Get the redirect path from the location state (set by ProtectedRoute)
+  const from = (location.state as { from?: { pathname: string } })?.from?.pathname || '/dashboard';
   
   const [formData, setFormData] = useState<LoginFormData>({
     email: '',
@@ -78,7 +82,8 @@ const Login: React.FC = () => {
         email: formData.email,
         password: formData.password
       });
-      navigate('/dashboard');
+      // Redirect to the page they were trying to access, or dashboard if none
+      navigate(from, { replace: true });
     } catch (err) {
       // Error is handled by the auth hook
     }

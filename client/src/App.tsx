@@ -5,7 +5,8 @@ import { Box } from '@mui/material';
 import { RootState } from './store/store';
 import Header from './components/common/Header/Header';
 import Navigation from './components/common/Navigation/Navigation';
-import Home from './pages/Home/Home';
+import ProtectedRoute from './components/common/ProtectedRoute/ProtectedRoute';
+import Welcome from './pages/Welcome/Welcome';
 import Dashboard from './pages/Dashboard/Dashboard';
 import RideDetails from './pages/RideDetails/RideDetails';
 import CreateRide from './pages/Rides/CreateRideSimple';
@@ -49,40 +50,72 @@ const App: React.FC = () => {
           }}
         >
           <Routes>
-            {/* Public routes */}
+            {/* Public routes - only accessible when NOT authenticated */}
             <Route 
               path="/login" 
-              element={!isAuthenticated ? <Login /> : <Navigate to="/dashboard" />} 
+              element={
+                <ProtectedRoute requireAuth={false}>
+                  <Login />
+                </ProtectedRoute>
+              } 
             />
             <Route 
               path="/register" 
-              element={!isAuthenticated ? <Register /> : <Navigate to="/dashboard" />} 
+              element={
+                <ProtectedRoute requireAuth={false}>
+                  <Register />
+                </ProtectedRoute>
+              } 
             />
             <Route 
               path="/" 
-              element={!isAuthenticated ? <Home /> : <Navigate to="/dashboard" />} 
+              element={
+                <ProtectedRoute requireAuth={false}>
+                  <Welcome />
+                </ProtectedRoute>
+              } 
             />
 
-            {/* Protected routes */}
+            {/* Protected routes - only accessible when authenticated */}
             <Route 
               path="/dashboard" 
-              element={isAuthenticated ? <Dashboard /> : <Navigate to="/login" />} 
+              element={
+                <ProtectedRoute>
+                  <Dashboard />
+                </ProtectedRoute>
+              } 
             />
             <Route 
               path="/rides/create" 
-              element={isAuthenticated ? <CreateRide /> : <Navigate to="/login" />} 
+              element={
+                <ProtectedRoute>
+                  <CreateRide />
+                </ProtectedRoute>
+              } 
             />
             <Route 
               path="/rides" 
-              element={isAuthenticated ? <RidesList /> : <Navigate to="/login" />} 
+              element={
+                <ProtectedRoute>
+                  <RidesList />
+                </ProtectedRoute>
+              } 
             />
             <Route 
               path="/rides/:id" 
-              element={isAuthenticated ? <RideDetails /> : <Navigate to="/login" />} 
+              element={
+                <ProtectedRoute>
+                  <RideDetails />
+                </ProtectedRoute>
+              } 
             />
             <Route 
               path="/profile" 
-              element={isAuthenticated ? <Profile /> : <Navigate to="/login" />} 
+              element={
+                <ProtectedRoute>
+                  <Profile />
+                </ProtectedRoute>
+              } 
             />
 
             {/* Catch all route */}

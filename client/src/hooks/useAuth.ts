@@ -28,26 +28,47 @@ export const useAuth = () => {
     (state: RootState) => state.auth
   );
 
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    dispatch(logout());
+  };
+
   useEffect(() => {
     // Check for token in localStorage on app start
     const storedToken = localStorage.getItem('token');
     if (storedToken && !isAuthenticated) {
-      // Here you would typically validate the token with the server
-      // For now, we'll just assume it's valid if it exists
-      try {
-        const userData = localStorage.getItem('user');
-        if (userData) {
-          const user = JSON.parse(userData);
-          dispatch(loginSuccess({ user, token: storedToken }));
-        }
-      } catch (error) {
-        // If there's an error parsing user data, logout
-        console.error('Error parsing stored user data:', error);
-        console.log('Logging out due to corrupted user data');
-        dispatch(logout());
-      }
+      // Validate the token with the server
+      validateToken(storedToken);
     }
   }, [dispatch, isAuthenticated]);
+
+  const validateToken = async (token: string) => {
+    try {
+      dispatch(loginStart());
+      
+      const response = await fetch(getApiUrl('/api/users/profile'), {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (response.ok) {
+        const user = await response.json();
+        dispatch(loginSuccess({ user, token }));
+        localStorage.setItem('user', JSON.stringify(user));
+      } else {
+        // Token is invalid, logout
+        console.log('🚫 Token validation failed - logging out');
+        handleLogout();
+      }
+    } catch (error) {
+      console.error('🚫 Token validation error:', error);
+      handleLogout();
+    }
+  };
 
   const register = async (data: RegisterData) => {
     dispatch(loginStart());
@@ -116,12 +137,6 @@ export const useAuth = () => {
       dispatch(loginFailure(errorMessage));
       throw error;
     }
-  };
-
-  const handleLogout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    dispatch(logout());
   };
 
   return {

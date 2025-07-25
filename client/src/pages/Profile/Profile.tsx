@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Box,
   Typography,
@@ -37,6 +37,9 @@ import {
   CalendarToday
 } from '@mui/icons-material';
 import { useAuth } from '../../hooks/useAuth';
+import { getApiUrl } from '../../config/api';
+import { useDispatch } from 'react-redux';
+import { updateUser } from '../../store/slices/authSlice';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -65,15 +68,47 @@ function TabPanel(props: TabPanelProps) {
 
 const Profile: React.FC = () => {
   const { user } = useAuth();
+  const dispatch = useDispatch();
   const [activeTab, setActiveTab] = useState(0);
   const [editDialog, setEditDialog] = useState(false);
-  const [editData, setEditData] = useState({
-    firstName: user?.profile.firstName || '',
-    lastName: user?.profile.lastName || '',
-    bio: user?.profile.bio || '',
-    experienceLevel: user?.cycling.experienceLevel || '',
-    preferredRideTypes: user?.cycling.preferredRideTypes || []
+  const [editData, setEditData] = useState<{
+    firstName: string;
+    lastName: string;
+    bio: string;
+    experienceLevel: string;
+    preferredRideTypes: string[];
+  }>({
+    firstName: '',
+    lastName: '',
+    bio: '',
+    experienceLevel: '',
+    preferredRideTypes: []
   });
+
+  // Update edit data when user data changes or dialog opens
+  const openEditDialog = () => {
+    setEditData({
+      firstName: user?.profile?.firstName || '',
+      lastName: user?.profile?.lastName || '',
+      bio: user?.profile?.bio || '',
+      experienceLevel: user?.cycling?.experienceLevel || '',
+      preferredRideTypes: user?.cycling?.preferredRideTypes || []
+    });
+    setEditDialog(true);
+  };
+
+  // Update edit form when user data changes
+  useEffect(() => {
+    if (user && editDialog) {
+      setEditData({
+        firstName: user?.profile?.firstName || '',
+        lastName: user?.profile?.lastName || '',
+        bio: user?.profile?.bio || '',
+        experienceLevel: user?.cycling?.experienceLevel || '',
+        preferredRideTypes: user?.cycling?.preferredRideTypes || []
+      });
+    }
+  }, [user, editDialog]);
 
   const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
     setActiveTab(newValue);
@@ -82,7 +117,14 @@ const Profile: React.FC = () => {
   const handleEditSave = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('/api/users/profile', {
+      if (!token) {
+        console.error('No authentication token found');
+        return;
+      }
+
+      console.log('Updating profile with data:', editData);
+      
+      const response = await fetch(getApiUrl('/api/users/profile'), {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -101,9 +143,22 @@ const Profile: React.FC = () => {
         })
       });
 
+      console.log('Profile update response status:', response.status);
+      
       if (response.ok) {
+        const updatedUser = await response.json();
+        console.log('Profile updated successfully:', updatedUser);
+        
+        // Update localStorage with the new user data
+        localStorage.setItem('user', JSON.stringify(updatedUser));
+        
+        // Update Redux store with the new user data
+        dispatch(updateUser(updatedUser));
+        
         setEditDialog(false);
-        // You might want to update the user state here
+      } else {
+        const errorData = await response.text();
+        console.error('Failed to update profile:', response.status, errorData);
       }
     } catch (error) {
       console.error('Failed to update profile:', error);
@@ -181,7 +236,7 @@ const Profile: React.FC = () => {
               <Button
                 variant="outlined"
                 startIcon={<Edit />}
-                onClick={() => setEditDialog(true)}
+                onClick={openEditDialog}
               >
                 Edit Profile
               </Button>
