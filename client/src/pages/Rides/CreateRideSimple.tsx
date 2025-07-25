@@ -21,6 +21,7 @@ import {
   DirectionsBike as BikeIcon
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
+import { getApiUrl } from '../../config/api';
 
 interface CreateRideData {
   title: string;
@@ -97,7 +98,7 @@ const CreateRideSimple: React.FC = () => {
 
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:5000/api/rides', {
+      const response = await fetch(getApiUrl('/api/rides'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

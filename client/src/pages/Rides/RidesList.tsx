@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { getApiUrl } from '../../config/api';
 import {
   Box,
   Typography,
@@ -112,7 +113,7 @@ const RidesList: React.FC = () => {
       setLoading(true);
       const token = localStorage.getItem('token');
       
-      let url = 'http://localhost:5000/api/rides';
+      let url = getApiUrl('/api/rides');
       
       // If nearby search is enabled, try to get user's location and fetch nearby rides
       if (filters.nearbyOnly) {
@@ -123,7 +124,7 @@ const RidesList: React.FC = () => {
             });
             
             const { latitude, longitude } = position.coords;
-            url = `http://localhost:5000/api/rides/nearby?lat=${latitude}&lng=${longitude}&radius=${filters.searchRadius}`;
+            url = `${getApiUrl('/api/rides')}/nearby?lat=${latitude}&lng=${longitude}&radius=${filters.searchRadius}`;
           } catch (geoError) {
             console.warn('Geolocation failed, falling back to all rides');
           }
@@ -179,7 +180,7 @@ const RidesList: React.FC = () => {
   const handleJoinRide = async (rideId: string) => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:5000/api/rides/${rideId}/join`, {
+      const response = await fetch(`${getApiUrl('/api/rides')}/${rideId}/join`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`

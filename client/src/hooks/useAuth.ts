@@ -1,5 +1,6 @@
 import { useSelector, useDispatch } from 'react-redux';
-import { useEffect } from 'react';
+import { useState, useContext, createContext, ReactNode, useEffect } from 'react';
+import { getApiUrl } from '../config/api';
 import { RootState } from '../store/store';
 import { loginStart, loginSuccess, loginFailure, logout } from '../store/slices/authSlice';
 
@@ -49,7 +50,7 @@ export const useAuth = () => {
   const register = async (data: RegisterData) => {
     dispatch(loginStart());
     try {
-      const response = await fetch('http://localhost:5000/api/auth/register', {
+      const response = await fetch(getApiUrl('/api/auth/register'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -79,7 +80,7 @@ export const useAuth = () => {
   const login = async (data: LoginData) => {
     dispatch(loginStart());
     try {
-      const response = await fetch('http://localhost:5000/api/auth/login', {
+      const response = await fetch(getApiUrl('/api/auth/login'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

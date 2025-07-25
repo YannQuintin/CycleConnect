@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { API_CONFIG } from '../../config/api';
 import {
   Box,
   Card,
@@ -59,7 +60,7 @@ const RideChat: React.FC<RideChatProps> = ({ rideId, isParticipant }) => {
 
     // Initialize socket connection
     const token = localStorage.getItem('token');
-    const socketInstance = io('http://localhost:5000', {
+    const socketInstance = io(API_CONFIG.SOCKET_URL, {
       auth: { token }
     });
 
