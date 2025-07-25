@@ -19,6 +19,12 @@ dotenv.config();
 
 const app = express();
 const server = createServer(app);
+
+// Trust proxy for Railway deployment
+if (process.env.NODE_ENV === 'production') {
+  app.set('trust proxy', 1);
+}
+
 const io = new Server(server, {
   cors: {
     origin: function (origin, callback) {
