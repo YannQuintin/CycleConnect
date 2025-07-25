@@ -21,7 +21,27 @@ const app = express();
 const server = createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: process.env.CLIENT_URL || "http://localhost:3000",
+    origin: function (origin, callback) {
+      // Allow requests with no origin
+      if (!origin) return callback(null, true);
+      
+      // Allow localhost for development
+      if (origin.includes('localhost') || origin.includes('127.0.0.1')) {
+        return callback(null, true);
+      }
+      
+      // Allow any vercel.app domain
+      if (origin.includes('yannquintins-projects.vercel.app')) {
+        return callback(null, true);
+      }
+      
+      // Allow the specific CLIENT_URL if set
+      if (process.env.CLIENT_URL && origin === process.env.CLIENT_URL) {
+        return callback(null, true);
+      }
+      
+      return callback(null, false);
+    },
     credentials: true
   }
 });
@@ -37,7 +57,29 @@ app.use(helmet());
 app.use(compression());
 app.use(limiter);
 app.use(cors({
-  origin: process.env.CLIENT_URL || "http://localhost:3000",
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    
+    // Allow localhost for development
+    if (origin.includes('localhost') || origin.includes('127.0.0.1')) {
+      return callback(null, true);
+    }
+    
+    // Allow any vercel.app domain for your deployments
+    if (origin.includes('yannquintins-projects.vercel.app')) {
+      return callback(null, true);
+    }
+    
+    // Allow the specific CLIENT_URL if set
+    if (process.env.CLIENT_URL && origin === process.env.CLIENT_URL) {
+      return callback(null, true);
+    }
+    
+    // Block other origins
+    const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
+    return callback(new Error(msg), false);
+  },
   credentials: true
 }));
 app.use(express.json({ limit: '10mb' }));
