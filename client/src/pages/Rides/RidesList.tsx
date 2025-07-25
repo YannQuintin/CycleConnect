@@ -142,7 +142,9 @@ const RidesList: React.FC = () => {
       }
 
       const ridesData = await response.json();
-      setRides(ridesData);
+      // Extract rides array from response (API returns {rides: [], pagination: {}})
+      const ridesArray = Array.isArray(ridesData) ? ridesData : ridesData.rides || [];
+      setRides(ridesArray);
     } catch (error) {
       setError(error instanceof Error ? error.message : 'Failed to fetch rides');
     } finally {
@@ -210,7 +212,7 @@ const RidesList: React.FC = () => {
     });
   };
 
-  const filteredRides = rides.filter(ride => {
+  const filteredRides = (rides || []).filter(ride => {
     // Search term filter
     if (searchTerm && !ride.title.toLowerCase().includes(searchTerm.toLowerCase()) &&
         !ride.description.toLowerCase().includes(searchTerm.toLowerCase()) &&

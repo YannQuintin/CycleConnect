@@ -20,7 +20,7 @@ export interface User {
       profileId: string;
     }[];
   };
-  location: {
+  location?: {
     type: 'Point';
     coordinates: [number, number];
     address?: string;

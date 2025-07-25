@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { getApiUrl } from '../../config/api';
 import {
   Box,
   Typography,
@@ -32,29 +33,38 @@ interface Ride {
   _id: string;
   title: string;
   description: string;
+  organizer: {
+    _id: string;
+    profile: {
+      firstName: string;
+      lastName: string;
+      profileImage?: string;
+    };
+  };
+  rideType: string;
+  difficulty: string;
   schedule: {
     startTime: string;
-    estimatedDuration: number;
+    estimatedDuration?: number;
   };
   route: {
     startPoint: {
       address: string;
       coordinates: [number, number];
     };
-    endPoint: {
+    endPoint?: {
       address: string;
       coordinates: [number, number];
     };
-    distance: number;
+    distance?: number;
   };
-  difficulty: 'easy' | 'moderate' | 'hard';
   participants: {
-    organizer: string;
+    confirmed: string[];
+    pending: string[];
     currentCount: number;
     maxParticipants: number;
-    members: string[];
   };
-  status: 'upcoming' | 'active' | 'completed' | 'cancelled';
+  status: string;
   createdAt: string;
 }
 
@@ -71,7 +81,7 @@ const RideDetails: React.FC = () => {
     const fetchRide = async () => {
       try {
         const token = localStorage.getItem('token');
-        const response = await fetch(`/api/rides/${id}`, {
+        const response = await fetch(getApiUrl(`/api/rides/${id}`), {
           headers: {
             'Authorization': `Bearer ${token}`
           }
@@ -101,7 +111,7 @@ const RideDetails: React.FC = () => {
     setJoining(true);
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`/api/rides/${ride._id}/join`, {
+      const response = await fetch(getApiUrl(`/api/rides/${ride._id}/join`), {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -128,7 +138,7 @@ const RideDetails: React.FC = () => {
     setJoining(true);
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`/api/rides/${ride._id}/leave`, {
+      const response = await fetch(getApiUrl(`/api/rides/${ride._id}/leave`), {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -188,8 +198,8 @@ const RideDetails: React.FC = () => {
     );
   }
 
-  const isParticipant = user && ride.participants.members.includes(user._id);
-  const isOrganizer = user && ride.participants.organizer === user._id;
+  const isParticipant = user && (ride.participants.confirmed.includes(user._id) || ride.participants.pending.includes(user._id));
+  const isOrganizer = user && ride.organizer._id === user._id;
   const isFull = ride.participants.currentCount >= ride.participants.maxParticipants;
 
   return (
@@ -245,15 +255,19 @@ const RideDetails: React.FC = () => {
                     <Typography variant="body2" sx={{ mb: 1 }}>
                       <strong>Start:</strong> {ride.route.startPoint.address}
                     </Typography>
-                    <Typography variant="body2" sx={{ mb: 1 }}>
-                      <strong>End:</strong> {ride.route.endPoint.address}
-                    </Typography>
-                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                      <DirectionsBike sx={{ mr: 1, fontSize: 16 }} />
-                      <Typography variant="body2">
-                        Distance: {ride.route.distance} km
+                    {ride.route.endPoint && (
+                      <Typography variant="body2" sx={{ mb: 1 }}>
+                        <strong>End:</strong> {ride.route.endPoint.address}
                       </Typography>
-                    </Box>
+                    )}
+                    {ride.route.distance && (
+                      <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                        <DirectionsBike sx={{ mr: 1, fontSize: 16 }} />
+                        <Typography variant="body2">
+                          Distance: {ride.route.distance} km
+                        </Typography>
+                      </Box>
+                    )}
                   </Paper>
                 </Grid>
               </Grid>
@@ -305,20 +319,52 @@ const RideDetails: React.FC = () => {
                 )}
 
                 <List>
-                  {ride.participants.members.map((memberId, index) => (
-                    <React.Fragment key={memberId}>
+                  {/* Show organizer first */}
+                  <ListItem>
+                    <ListItemAvatar>
+                      <Avatar>
+                        {ride.organizer.profile.firstName[0]}{ride.organizer.profile.lastName[0]}
+                      </Avatar>
+                    </ListItemAvatar>
+                    <ListItemText
+                      primary="Organizer"
+                      secondary={`${ride.organizer.profile.firstName} ${ride.organizer.profile.lastName}${ride.organizer._id === user?._id ? ' (You)' : ''}`}
+                    />
+                  </ListItem>
+                  
+                  {/* Show confirmed participants */}
+                  {ride.participants.confirmed.map((participantId: string) => (
+                    <React.Fragment key={participantId}>
+                      <Divider />
                       <ListItem>
                         <ListItemAvatar>
                           <Avatar>
-                            {memberId === ride.participants.organizer ? 'O' : 'M'}
+                            P
                           </Avatar>
                         </ListItemAvatar>
                         <ListItemText
-                          primary={memberId === ride.participants.organizer ? 'Organizer' : 'Member'}
-                          secondary={memberId === user?._id ? 'You' : memberId}
+                          primary="Participant"
+                          secondary={participantId === user?._id ? 'You' : participantId}
                         />
                       </ListItem>
-                      {index < ride.participants.members.length - 1 && <Divider />}
+                    </React.Fragment>
+                  ))}
+                  
+                  {/* Show pending participants */}
+                  {ride.participants.pending.map((participantId: string) => (
+                    <React.Fragment key={`pending-${participantId}`}>
+                      <Divider />
+                      <ListItem>
+                        <ListItemAvatar>
+                          <Avatar sx={{ backgroundColor: 'warning.main' }}>
+                            ?
+                          </Avatar>
+                        </ListItemAvatar>
+                        <ListItemText
+                          primary="Pending Approval"
+                          secondary={participantId === user?._id ? 'You' : participantId}
+                        />
+                      </ListItem>
                     </React.Fragment>
                   ))}
                 </List>

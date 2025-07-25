@@ -1,9 +1,11 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
+import { getApiUrl } from '../../config/api';
 
+// This file defines the API endpoints for authentication using RTK Query
 export const authApi = createApi({
   reducerPath: 'authApi',
   baseQuery: fetchBaseQuery({
-    baseUrl: '/api/auth',
+    baseUrl: getApiUrl('/api/auth'),
     prepareHeaders: (headers, { getState }) => {
       // Add auth token if available
       const token = (getState() as any).auth.token;

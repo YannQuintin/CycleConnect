@@ -23,9 +23,9 @@ export interface IUser extends Document {
       profileId: string;
     }[];
   };
-  location: {
+  location?: {
     type: 'Point';
-    coordinates: [number, number];
+    coordinates: number[];
     address?: string;
     radius: number;
   };
@@ -95,20 +95,21 @@ const userSchema = new Schema<IUser>({
     type: {
       type: String,
       enum: ['Point'],
-      default: 'Point'
+      required: function() { return this.location && this.location.coordinates && this.location.coordinates.length > 0; }
     },
     coordinates: {
       type: [Number],
-      required: true,
       validate: {
-        validator: function(v: number[]) {
-          return v.length === 2;
+        validator: function(v: number[] | undefined) {
+          // Allow undefined or valid coordinate pair
+          if (!v || v.length === 0) return true;
+          return Array.isArray(v) && v.length === 2;
         },
         message: 'Coordinates must be [longitude, latitude]'
       }
     },
     address: String,
-    radius: { type: Number, default: 25, min: 1, max: 100 }
+    radius: { type: Number, min: 1, max: 100, default: 50 }
   },
   preferences: {
     notifications: {
@@ -135,7 +136,7 @@ const userSchema = new Schema<IUser>({
 });
 
 // Indexes for performance
-userSchema.index({ location: '2dsphere' });
+// userSchema.index({ location: '2dsphere' }, { sparse: true }); // Temporarily disabled for registration testing
 userSchema.index({ email: 1 });
 userSchema.index({ 'profile.firstName': 1, 'profile.lastName': 1 });
 userSchema.index({ 'cycling.experienceLevel': 1 });
@@ -151,6 +152,15 @@ userSchema.pre('save', async function(next) {
   } catch (error) {
     next(error as Error);
   }
+});
+
+// Clean up location field if it has empty coordinates
+userSchema.pre('save', function(next) {
+  if (this.location && this.location.coordinates && Array.isArray(this.location.coordinates) && this.location.coordinates.length === 0) {
+    // Remove the entire location field if coordinates are empty
+    this.location = undefined;
+  }
+  next();
 });
 
 // Compare password method

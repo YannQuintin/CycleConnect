@@ -42,6 +42,8 @@ export const useAuth = () => {
         }
       } catch (error) {
         // If there's an error parsing user data, logout
+        console.error('Error parsing stored user data:', error);
+        console.log('Logging out due to corrupted user data');
         dispatch(logout());
       }
     }
@@ -60,7 +62,16 @@ export const useAuth = () => {
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.message || 'Registration failed');
+        console.error('🔴 Registration error details:', errorData);
+        let errorMessage = errorData.message || 'Registration failed';
+        
+        // Show more specific error details if available
+        if (errorData.details && Array.isArray(errorData.details)) {
+          const detailMessages = errorData.details.map((detail: any) => detail.message || detail.msg).join(', ');
+          errorMessage += `: ${detailMessages}`;
+        }
+        
+        throw new Error(errorMessage);
       }
 
       const { user, token } = await response.json();

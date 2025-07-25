@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { API_CONFIG } from '../../config/api';
+import { API_CONFIG, getApiUrl } from '../../config/api';
 import {
   Box,
   Card,
@@ -106,7 +106,7 @@ const RideChat: React.FC<RideChatProps> = ({ rideId, isParticipant }) => {
   const fetchMessages = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`/api/rides/${rideId}/messages`, {
+      const response = await fetch(getApiUrl(`/api/rides/${rideId}/messages`), {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -115,9 +115,15 @@ const RideChat: React.FC<RideChatProps> = ({ rideId, isParticipant }) => {
       if (response.ok) {
         const messagesData = await response.json();
         setMessages(messagesData);
+      } else if (response.status === 404) {
+        // Messages endpoint not implemented yet, just use empty array
+        console.log('Messages endpoint not implemented yet');
+        setMessages([]);
       }
     } catch (error) {
       console.error('Failed to fetch messages:', error);
+      // Set empty messages array as fallback
+      setMessages([]);
     }
   };
 

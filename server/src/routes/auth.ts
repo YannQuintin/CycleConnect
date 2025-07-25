@@ -11,7 +11,7 @@ router.post('/register', [
   body('password').isLength({ min: 6 }),
   body('profile.firstName').notEmpty().trim(),
   body('profile.lastName').notEmpty().trim(),
-  body('location.coordinates').isArray({ min: 2, max: 2 })
+  body('location.coordinates').optional().isArray({ min: 2, max: 2 })
 ], async (req: Request, res: Response) => {
   console.log('🔐 Registration attempt for:', req.body.email);
   
@@ -42,14 +42,24 @@ router.post('/register', [
 
     console.log('✅ Email is available, creating new user:', email);
 
-    // Create new user
-    const user = new User({
+    // Create new user - only include location if coordinates are provided
+    const userData: any = {
       email,
       password,
       profile,
-      cycling: cycling || {},
-      location
-    });
+      cycling: cycling || {}
+    };
+
+    // Only add location if coordinates are provided
+    if (location && location.coordinates && Array.isArray(location.coordinates) && location.coordinates.length === 2) {
+      userData.location = location;
+    }
+
+    console.log('🔍 User data being passed to User constructor:', JSON.stringify(userData, null, 2));
+
+    const user = new User(userData);
+
+    console.log('🔍 User object after creation (before save):', JSON.stringify(user.toObject(), null, 2));
 
     await user.save();
     console.log('✅ User created successfully in database:', email);

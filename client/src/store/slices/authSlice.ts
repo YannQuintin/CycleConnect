@@ -14,7 +14,7 @@ interface User {
     experienceLevel: string;
     preferredRideTypes: string[];
   };
-  location: {
+  location?: {
     coordinates: [number, number];
     address?: string;
     radius: number;

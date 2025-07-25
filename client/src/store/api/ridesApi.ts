@@ -1,9 +1,10 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
+import { getApiUrl } from '../../config/api';
 
 export const ridesApi = createApi({
   reducerPath: 'ridesApi',
   baseQuery: fetchBaseQuery({
-    baseUrl: '/api/rides',
+    baseUrl: getApiUrl('/api/rides'),
     prepareHeaders: (headers, { getState }) => {
       const token = (getState() as any).auth.token;
       if (token) {

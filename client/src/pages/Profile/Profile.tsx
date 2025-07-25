@@ -141,15 +141,15 @@ const Profile: React.FC = () => {
             <Grid item>
               <Avatar 
                 sx={{ width: 120, height: 120 }}
-                src={user.profile.profileImage}
+                src={user.profile?.profileImage}
               >
-                {user.profile.firstName[0]}{user.profile.lastName[0]}
+                {user.profile?.firstName?.[0]}{user.profile?.lastName?.[0]}
               </Avatar>
             </Grid>
             <Grid item xs>
               <Typography variant="h4" component="h1" gutterBottom>
-                {user.profile.firstName} {user.profile.lastName}
-                {user.profile.verified && (
+                {user.profile?.firstName} {user.profile?.lastName}
+                {user.profile?.verified && (
                   <Chip 
                     label="Verified" 
                     color="primary" 
@@ -159,15 +159,15 @@ const Profile: React.FC = () => {
                 )}
               </Typography>
               <Typography variant="body1" color="text.secondary" paragraph>
-                {user.profile.bio || 'No bio provided yet.'}
+                {user.profile?.bio || 'No bio provided yet.'}
               </Typography>
               <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
                 <Chip 
-                  label={user.cycling.experienceLevel} 
+                  label={user.cycling?.experienceLevel || 'Not specified'} 
                   color="primary" 
                   variant="outlined" 
                 />
-                {user.cycling.preferredRideTypes.map((type: string) => (
+                {(user.cycling?.preferredRideTypes || []).map((type: string) => (
                   <Chip 
                     key={type} 
                     label={type} 
@@ -239,10 +239,10 @@ const Profile: React.FC = () => {
                   <ListItemIcon><Email /></ListItemIcon>
                   <ListItemText primary={user.email} secondary="Email" />
                 </ListItem>
-                {user.location.address && (
+                {user.location?.address && (
                   <ListItem>
                     <ListItemIcon><LocationOn /></ListItemIcon>
-                    <ListItemText primary={user.location.address} secondary="Location" />
+                    <ListItemText primary={user.location?.address} secondary="Location" />
                   </ListItem>
                 )}
                 <ListItem>
@@ -260,14 +260,14 @@ const Profile: React.FC = () => {
                 <ListItem>
                   <ListItemIcon><DirectionsBike /></ListItemIcon>
                   <ListItemText 
-                    primary={user.cycling.experienceLevel} 
+                    primary={user.cycling?.experienceLevel || 'Not specified'} 
                     secondary="Experience Level" 
                   />
                 </ListItem>
                 <ListItem>
                   <ListItemIcon><Group /></ListItemIcon>
                   <ListItemText 
-                    primary={user.cycling.preferredRideTypes.join(', ')} 
+                    primary={(user.cycling?.preferredRideTypes || []).join(', ') || 'None specified'} 
                     secondary="Preferred Ride Types" 
                   />
                 </ListItem>
